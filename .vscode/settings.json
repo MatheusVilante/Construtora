@@ -1,0 +1,14 @@
+{
+    "launch": {
+        
+
+        "configurations": [],
+        "compounds": []
+    },
+    "editor.quickSuggestions": {
+        "other": "inline",
+        "comments": "inline",
+        "strings": "inline"
+    },
+    "editor.suggest.preview": true
+}
