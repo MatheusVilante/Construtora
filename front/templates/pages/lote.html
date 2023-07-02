@@ -3,6 +3,7 @@
 {% block conteudo  %}
 <!DOCTYPE html>
 <html lang="pt">
+
   <!-- The Modal -->
   <div  class="modal" id="exampleModal"   role="dialog"  >
     <div class="modal-dialog" role="document">
@@ -10,7 +11,7 @@
 
         <!-- Modal Header -->
         <div class="modal-header">
-            <h2 class="modal-title" id="exampleModalLabel">lote</h2>
+            <h2 class="modal-title" id="exampleModalLabel">Lote</h2>
             <button type="button" class="close" data-dismiss="modal" >&times;</button>
         </div>
 
@@ -19,28 +20,13 @@
              <form id="cadastro">
               <input type="hidden" id="id" name="id" value=""/>
               <div class="form-group">
-                <label for="quadra">Quadra</label>
-                <input type="text" class="form-control" id="quadra" name="quadra"  placeholder="Quadra">
+                <label for="quadra">quadra</label>
+                <select type="text" class="form-control" id="quadra" name="quadra"  placeholder="quadra">
+                    </select>
               </div>
               <div class="form-group">
                 <label for="lote">Lote</label>
                 <input type="text" class="form-control" id="lote" name="lote"  placeholder="Lote">
-              </div>
-              <div class="form-group">
-                <label for="cliente">Cliente</label>
-                <input type="text" class="form-control" id="cliente" name="cliente"  placeholder="Cliente">
-              </div>
-              <div class="form-group">
-                <label for="endereco">Endereco</label>
-                <input type="text" class="form-control" id="endereco" name="endereco"  placeholder="Endereco">
-              </div>
-              <div class="form-group">
-                <label for="cidade">Cidade</label>
-                <input type="text" class="form-control" id="cidade" name="cidade"  placeholder="Cidade">
-              </div>
-              <div class="form-group">
-                <label for="telefone">Telefone</label>
-                <input type="text" class="form-control" id="telefone" name="telefone"  placeholder="Telefone">
               </div>
             </form>
           </div>
@@ -56,7 +42,7 @@
   </div>
 
     <div class="container-fluid px-4">
-        <h1 class="mt-4" style="color: #fff">lote</h1>
+        <h1 class="mt-4" style="color: #fff">Lote</h1>
         <div class="card mb-4">
             <div class="card-body">
                 <a class="btn btn-primary btn-success" href="javascript:novo()" data-toggle="modal" data-target="#exampleModal">Novo</a>
@@ -67,7 +53,7 @@
         </div>
         <div class="card mb-4">
             <div class="card-body">
-                <table id="datatablesSimple"> 
+                <table id="datatablesSimple">
                 </table>
             </div>
         </div>
@@ -76,8 +62,10 @@
     <!-- Modal -->  
 </main>
 <script>
-
-    var array_titulos = ['quadra', 'lote', 'cliente', 'endereco', 'cidade', 'telefone']
+    setTimeout(function(){
+      criar_select('quadra', './api/v1/select/quadra', 'quadra',{})
+    },1000);
+    var array_titulos = ['quadra', 'lote']
     var GLOBAL_TABELA = 'lote';
     function salvar(){
         var id = adicionar(GLOBAL_TABELA,array_titulos);
@@ -90,4 +78,4 @@
 
 
 </script>
-{% endblock %}
+{% endblock %}   

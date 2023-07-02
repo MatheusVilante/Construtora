@@ -22,6 +22,10 @@
                 <label for="quadra">Quadra</label>
                 <input type="text" class="form-control" id="quadra" name="quadra"  placeholder="Quadra">
               </div>
+              <div class="form-group">
+                <label for="residencial">Residencial</label>
+                <input type="text" class="form-control" id="residencial" name="residencial"  placeholder="Residencial">
+              </div>
             </form>
           </div>
 
@@ -57,10 +61,10 @@
 </main>
 <script>
 
-    var array_titulos = ['quadra'];
+    var array_titulos = ['quadra', 'residencial'];
     var GLOBAL_TABELA = 'quadra';
     function salvar(){
-        var id = adicionar(GLOBAL_TABELA,array_titulos);
+        adicionar(GLOBAL_TABELA,array_titulos);
     }
     function carregar(){
        listar(GLOBAL_TABELA,array_titulos);

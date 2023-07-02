@@ -34,46 +34,62 @@ function zerar_form(){
         });
     }
 
-function adicionar(tabela,campos){
-    var data = objectifyForm($('#cadastro').serializeArray());
-    var valida = true;
-    var csrf_token = $("input[name='csrfmiddlewaretoken']").val(); // obter token CSRF
-    data += "&csrfmiddlewaretoken=" + csrf_token;
-    
-    campos_msg = 'Favor Preencher ';
-    for (i=0; i<campos.length;i++){
-    if (data[campos[i]] == null || data[campos[i]] == ''){
-        if (valida == false){
-            campos_msg+=', ';
-        }
-        campos_msg+=corrigir_titulo(campos[i]);
-        valida=false;
-    }
-    }
-    if (valida == false){
-        alert(campos_msg)
-    }else{
-        // alert(data)
-    var url = '/api/v1/'+tabela+'/';
-    var method = 'POST';
-    if (data.id != ''){
-        url += data.id+'/'
-        method = 'PUT';
-    }
-    $.ajax({url:url,type:method,data:data, error: function(e) {
-        var campos = '';
-        $.each(e.responseJSON,function(index,value){
-            campos += index+': '+value+'\n\n'
-        });
-        alert(campos)
-        },
-        success: function (data){
-            carregar();          
-            alert ('Sucesso!');
-        },dataType:'json'});
-    }
 
-}
+function adicionar(tabela,campos,campoMarcado = null){
+    var data = objectifyForm($('#cadastro').serializeArray());
+    // Obter uma lista de todas as checkboxes do formulário
+    var checkboxes = document.querySelectorAll('#cadastro input[type="checkbox"]');
+    // Percorrer a lista de checkboxes
+    checkboxes.forEach(function(checkbox) {
+    // Se a checkbox não estiver selecionada, definir seu valor como "false"
+    if (!checkbox.checked) {
+        data[checkbox.name] = "false";
+    }
+    });
+    if (campoMarcado != null) {
+        data[campoMarcado] = "true";
+    }
+    
+    var valida = true;
+    campos_msg = 'Favor Preencher ';
+    //    alert($('#gerar_cila').serializeArray())
+    for (i=0; i<campos.length;i++){
+        if (data[campos[i]] == null || data[campos[i]] == ''){
+            if (valida == false){
+                campos_msg+=', ';
+            }
+            campos_msg+=corrigir_titulo(campos[i]);
+            valida=false;
+        }
+        }
+        if (valida == false){
+            // alert(data)
+            alert(campos_msg)
+        }else{
+            // alert(data)
+        var url = '/api/v1/'+tabela+'/';
+        var method = 'POST';
+        if (data.id != ''){
+            url += data.id+'/'
+            method = 'PUT';
+        }
+        $.ajax({url:url,type:method,data:data, error: function(e) {
+            var campos = '';
+            $.each(e.responseJSON,function(index,value){
+                campos += index+': '+value+'\n\n'
+            });
+            alert(campos)
+            },
+            success: function (data){
+            carregar();           
+            guardar_token();
+            alert ('Sucesso!');
+            zerar_form();
+            },dataType:'json'});
+    }
+    
+    }
+     
 
 var datatable = null
 
@@ -90,64 +106,65 @@ function criar_select(id, url,titulo,filtro={}) {
         url: url,
         type: 'POST',
         data:filtro,
+        
         error: function(e) {
-        // alert(e)
+        // alert(e);
         },
         
         success: function (data){
             s = '<option value=""> selecionar '+capitalizeFirstLetter(titulo)+'</option>';
-            $.each(data, function(key, value) {
-                s += '<option value="' + value[0] + '">' + value[1] + '</option>';
-            });
+            if (data.length > 0) {
+                var valueArray = data[0];
+                var hascampo = valueArray.length === 3; // Verifica se há a presença de um terceiro campo
+
+                $.each(data, function(key, value) {
+                    s += '<option value="' + value[0] + '">';
+                    s += value[1]; 
+
+                    if (hascampo) {
+                        s += ' - ' + value[2]; // cila
+                    }
+                    s += '</option>';
+                });
+            }
             s += '</select>' ;
             $("#"+id).html(s);
         },dataType:'json'});
 }
 
-function listar(tabela,campos,id,tabela_tipo = 'datatablesSimple', indexphoto = null){
-    // alert(tabela_tipo)
-    if ((tabela_tipo == 'datatablesSimple')&&(datatable != null)){
-        datatable.destroy()     
-
+function listar(tabela, campos, campoVerificacao = null, tabela_tipo = 'datatablesSimple') {
+    if (tabela_tipo == 'datatablesSimple' && datatable != null) {
+        datatable.destroy();
     }
-    var url = '/api/v1/'+tabela+'/'
-    if (id !=null){
-        url = '/api/v1/'+tabela+'/?id='+id
-}
-
-    $.get(url, function(data){
+    var url = '/api/v1/' + tabela + '/';
+    $.get(url, function(data) {
         global_dados_api_get = data;
         var html = '<thead><tr><th class="todos"><input type="checkbox" class="ckb-all" onclick="todos();" value="" /> Todos</th>';
 
-        for (i=0; i<campos.length;i++){
-
-            html+= '<th>'+corrigir_titulo(campos[i])+'</th>';
+        for (i = 0; i < campos.length; i++) {
+            html += '<th>' + corrigir_titulo(campos[i]) + '</th>';
         }
         html += '</tr></thead>';
-        html += '<tbody>'  
-        $.each(data, function(index,value){
-            html += '<tr>';
-            var id = value['id']
-            html+= '<td><input type="checkbox" class="ckbsel" name="ckb-'+id+'"  value="'+id+'" /></td>';
-            for (i=0; i<campos.length;i++){
-                if(i == indexphoto){
-                    html+= `<td><img src="${value[campos[i]]}"></img></td>`;
-                }else{
-                    html+= '<td>'+value[campos[i]]+'</td>';
+        html += '<tbody>';
+        $.each(data, function(index, value) {
+            if (campoVerificacao == null || value[campoVerificacao] === true ) {
+                html += '<tr>';
+                var id = value['id'];
+                html += '<td><input type="checkbox" class="ckbsel" name="ckb-' + id + '"  value="' + id + '" /></td>';
+                for (i = 0; i < campos.length; i++) {
+                    html += '<td>' + value[campos[i]] + '</td>';
                 }
+                html += '</tr>';
             }
-            html += '</tr>';
         });
 
-        
         html += '</tbody>';
 
-        $("#"+tabela_tipo).html(html);
+        $("#" + tabela_tipo).html(html);
 
-        datatable = $("#"+tabela_tipo).DataTable()
-    },'json');
+        datatable = $("#" + tabela_tipo).DataTable();
+    }, 'json');
 }
-
 
 function editar(){
     var selecionados = []
@@ -159,7 +176,8 @@ function editar(){
     }else if (selecionados.length == 0){
         alert('Favor selecionar uma linha')
     }else{
-        $("#openModa\l").click();
+    
+        $("#openModal").click();
         var id_selecionado = selecionados[0];
         console.log(global_dados_api_get)
         $.each(global_dados_api_get, function(index,value){

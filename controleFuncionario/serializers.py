@@ -4,4 +4,5 @@ from .models import ControleFuncionario
 class ControleFuncionarioSerializer(serializers.ModelSerializer):
     class Meta:
         model = ControleFuncionario
-        fields = ['id', 'funcionario', 'dias', 'total', 'periodo']
+        fields = ['id', 'funcionario',  'total', 'data']
+

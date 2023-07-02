@@ -16,59 +16,31 @@
 
             <!-- Modal body -->
           <div class="modal-body">
-             <form id="cadastro">
+            <form id="cadastro">
               <input type="hidden" id="id" name="id" value=""/>
+              <input type="hidden" class="form-control" id="cliente" name="cliente" >
               <div class="form-group">
-                <label for="nome">Nome</label>
-                <input type="text" class="form-control" id="nome" name="nome"  placeholder="Nome">
+                <label for="quadra">quadra</label>
+                <select type="text" class="form-control" class="form-control" onchange="criar_select('lote', './api/v1/select/lote?id='
+                +this.value, 'lote',{})" id="quadra" name="quadra"  placeholder="quadra">
+                    </select>
+              </div>              
+              <div class="form-group">
+                <label for="lote">lote</label>
+                <select type="text" class="form-control" id="lote" name="lote"  placeholder="lote">
+                    </select>
               </div>
               <div class="form-group">
-                <label for="email">Email</label>
-                <input type="email" class="form-control" id="email" name="email"  placeholder="Email">
+                <label for="data_parcelas">Data_parcelas</label>
+                <input type="date" class="form-control" id="data_parcelas" name="data_parcelas"  placeholder="Data_parcelas">
               </div>
               <div class="form-group">
-                <label for="telefone">Telefone</label>
-                <input type="text" class="form-control" id="telefone" name="telefone"  placeholder="Telefone">
+                <label for="valor_inicial">Valor_inicial</label>
+                <input type="number" class="form-control" id="valor_inicial" name="valor_inicial"  placeholder="Valor_inicial">
               </div>
               <div class="form-group">
-                <label for="endereco">Endereco</label>
-                <input type="text" class="form-control" id="endereco" name="endereco"  placeholder="Endereco">
-              </div>
-              <div class="form-group">
-                <label for="cidade">Cidade</label>
-                <input type="text" class="form-control" id="cidade" name="cidade"  placeholder="Cidade">
-              </div>
-              <div class="form-group">
-                <label for="estado">Estado</label>
-                <input type="text" class="form-control" id="estado" name="estado"  placeholder="Estado">
-              </div>
-              <div class="form-group">
-                <label for="cep">Cep</label>
-                <input type="text" class="form-control" id="cep" name="cep"  placeholder="Cep">
-              </div>
-              <div class="form-group">
-                <label for="dataNascimento">DataNascimento</label>
-                <input type="date" class="form-control" id="dataNascimento" name="dataNascimento"  placeholder="DataNascimento">
-              </div>
-              <div class="form-group">
-                <label for="contratoNovo">ContratoNovo</label>
-                <input type="text" class="form-control" id="contratoNovo" name="contratoNovo"  placeholder="ContratoNovo">
-              </div>
-              <div class="form-group">
-                <label for="vencimento">Vencimento</label>
-                <input type="date" class="form-control" id="vencimento" name="vencimento"  placeholder="Vencimento">
-              </div>
-              <div class="form-group">
-                <label for="datadeAssinatura">DatadeAssinatura</label>
-                <input type="date" class="form-control" id="datadeAssinatura" name="datadeAssinatura"  placeholder="DatadeAssinatura">
-              </div>
-              <div class="form-group">
-                <label for="data">Data</label>
-                <input type="date" class="form-control" id="data" name="data"  placeholder="Data">
-              </div>
-              <div class="form-group">
-                <label for="intercalada">Intercalada</label>
-                <input type="text" class="form-control" id="intercalada" name="intercalada"  placeholder="Intercalada">
+                <label for="numero_parcelas">Numero_parcelas</label>
+                <input type="number" class="form-control" id="numero_parcelas" name="numero_parcelas"  placeholder="Numero_parcelas">
               </div>
             </form>
           </div>
@@ -76,7 +48,7 @@
         <!-- Modal footer -->
         <div class="modal-footer">
             <button type="button" class="btn btn-danger" data-dismiss="modal" onclick="zerar_form()">Cancelar</button>
-            <button type="button" class="btn btn-success" data-dismiss="modal" onclick="salvar();">Salvar</button>
+            <button type="button" class="btn btn-success" data-dismiss="modal" onclick="atualizarClienteLote();">Salvar</button>
         </div>
 
       </div>
@@ -88,9 +60,8 @@
         <div class="card mb-4">
             <div class="card-body">
                 <a class="btn btn-primary btn-success" href="javascript:novo()" data-toggle="modal" data-target="#exampleModal">Novo</a>
-                <a class="btn btn-secondary btn-info" href="javascript:editar()">Editar</a>
                 <a id="openModal" data-toggle="modal" data-target="#exampleModal" style="display:none"></a>
-                <a class="btn btn-primary btn-danger" href="javascript:excluir(GLOBAL_TABELA)">Excluir</a>
+                <a class="btn btn-primary btn-danger" href="javascript:limparCliente()">Excluir</a>
             </div>
         </div>
         <div class="card mb-4">
@@ -104,18 +75,108 @@
     <!-- Modal -->  
 </main>
 <script>
+    setTimeout(function(){
+    criar_select('quadra', './api/v1/select/quadra', 'quadra',{})
+    },1000);
+    const urlParams = new URLSearchParams(window.location.search);
+    const GLOBAL_ID_EQUIPAMENTO =  urlParams.get("id");    
+    $("#cliente").val(GLOBAL_ID_EQUIPAMENTO);
+    
+    var array_titulos = ['quadra', 'lote', 'cliente']
+    var GLOBAL_TABELA = 'vincularLote';
+      function carregar(){
+          listar_parametro(GLOBAL_TABELA,array_titulos,GLOBAL_ID_EQUIPAMENTO);
 
-    var array_titulos = ['nome', 'email', 'telefone', 'endereco', 'cidade', 'estado', 'cep', 'dataNascimento', 'contratoNovo', 'vencimento', 'datadeAssinatura', 'data', 'intercalada']
-    var GLOBAL_TABELA = 'cliente';
-    function salvar(){
-        var id = adicionar(GLOBAL_TABELA,array_titulos);
+      }
+
+      carregar();
+
+      function limparCliente() {
+        var selecionados = []
+        $('.ckbsel:checked').each(function () {
+            selecionados.push(this.value)
+        });
+        if (selecionados.length > 1){
+            alert('Favor selecionar apenas uma linha')
+        }else if (selecionados.length == 0){
+            alert('Favor selecionar uma linha')
+        }else{
+          $.ajax({
+            url: `/api/v1/lote/${selecionados}/`,
+            type: "PUT",
+            data: {
+              cliente: null
+            },
+            success: function(response) {
+              alert("O cliente foi limpo com sucesso!");
+              carregar();
+            },
+            error: function(xhr, status, error) {
+              alert("Ocorreu um erro ao limpar o cliente:", error);
+            }
+          });
+        }
+      }
+      
+
+    function atualizarClienteLote() {
+        const loteId = $('#lote').val();
+        const clienteId = $('#cliente').val();
+        const valor_inicial = $('#valor_inicial').val();
+        const data_parcelas = $('#data_parcelas').val();
+        const numero_parcelas = $('#numero_parcelas').val();
+      
+        $.ajax({
+          url: `/api/v1/lote/${loteId}/`,
+          type: 'PUT',
+          data: {cliente: clienteId, data_parcelas: data_parcelas, numero_parcelas: numero_parcelas, valor_inicial:valor_inicial },
+          success: function() {
+            alert('Cliente do lote atualizado com sucesso!');
+            carregar(); 
+          },
+          error: function(jqXHR) {
+            alert(`Erro ao atualizar cliente do lote: ${jqXHR.responseText}`);
+          }
+        });
     }
-    function carregar(){
-       listar(GLOBAL_TABELA,array_titulos);
-    }
+    function listar_parametro(tabela,campos,id){
+      if (datatable != null){
+      datatable.destroy()     
 
-    carregar();
+      }
+      var url = '/'+tabela+'/'
+      if (id !=null){
+          url = '/'+tabela+'/?id='+id
+      }    
+      $.get(url, function(data){
+          global_dados_api_get = data;
+          var html = '<thead><tr><th class="todos"><input type="checkbox" class="ckb-all" onclick="todos();" value="" /> Todos</th>';
+          for (i=0; i<campos.length;i++){
+              html+= '<th>'+corrigir_titulo(campos[i])+'</th>';
+          }
+          html += '</tr></thead>';
+          html += '<tbody>'  
+          // if ( $.$.fn.dataTable.isDataTable('#datatablesSimple') ) {
+          //     $('#datatablesSimple').dataTable.clear();
+          //   }
+          
+          $.each(data, function(index,value){
+          html += '<tr>';
+          var id = value['id']
+          html+= '<td><input type="checkbox" class="ckbsel" name="ckb-'+id+'"  value="'+id+'" /></td>';
+          for (i=0; i<campos.length;i++){
+              html+= '<td>'+value[campos[i]]+'</td>';
+          }
+          html += '</tr>';
+          });
 
+          html += '</tbody>';
+
+          $("#datatablesSimple").html(html);
+
+          datatable = $("#datatablesSimple").DataTable()
+      },'json');
+  }
 
 </script>
 {% endblock %}

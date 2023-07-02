@@ -22,4 +22,3 @@ class Parcelamento(models.Model):
 
     class Meta:
         verbose_name_plural = "Parcelamentos"
-        ordering = ['id']

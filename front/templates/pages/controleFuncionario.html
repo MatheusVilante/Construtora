@@ -1,0 +1,83 @@
+{% extends '../layout/auth.html' %}
+{% load static %}
+{% block conteudo  %}
+<!DOCTYPE html>
+<html lang="pt">
+  <!-- The Modal -->
+  <div  class="modal" id="exampleModal"   role="dialog"  >
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+
+        <!-- Modal Header -->
+        <div class="modal-header">
+            <h2 class="modal-title" id="exampleModalLabel">Controle Funcionario</h2>
+            <button type="button" class="close" data-dismiss="modal" >&times;</button>
+        </div>
+
+            <!-- Modal body -->
+          <div class="modal-body">
+             <form id="cadastro">
+              <input type="hidden" id="id" name="id" value=""/>
+              <div class="form-group">
+                <label for="funcionario">Funcionario</label>
+                <input type="text" class="form-control" id="funcionario" name="funcionario"  placeholder="Funcionario">
+              </div>
+              <div class="form-group">
+                <label for="data">Data</label>
+                <input type="date" class="form-control" id="data" name="data"  placeholder="Data">
+              </div>
+              <div class="form-group">
+                <label for="total">Total</label>
+                <input type="number" class="form-control" id="total" name="total"  placeholder="Total">
+              </div>
+            </form>
+          </div>
+
+        <!-- Modal footer -->
+        <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-dismiss="modal" onclick="zerar_form()">Cancelar</button>
+            <button type="button" class="btn btn-success" data-dismiss="modal" onclick="salvar();">Salvar</button>
+        </div>
+
+      </div>
+    </div>
+</div>
+
+    <div class="container-fluid px-4">
+        <h1 class="mt-4" style="color: #fff">Controle Funcionario</h1>
+        <div class="card mb-4">
+            <div class="card-body">
+                <a class="btn btn-primary btn-success" href="javascript:novo()" data-toggle="modal" data-target="#exampleModal">Novo</a>
+                <a class="btn btn-secondary btn-info" href="javascript:editar()">Editar</a>
+                <a id="openModal" data-toggle="modal" data-target="#exampleModal" style="display:none"></a>
+                <a class="btn btn-primary btn-danger" href="javascript:excluir(GLOBAL_TABELA)">Excluir</a>
+            </div>
+        </div>
+        <div class="card mb-4">
+            <div class="card-body" style="overflow-x:scroll, max-width: 80%">
+                <table id="datatablesSimple"> 
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->  
+</main>
+<script>
+
+
+        
+    var array_titulos = ['funcionario', 'data', 'total',]
+    var GLOBAL_TABELA = 'controlefuncionario';
+    function salvar(){
+        var id = adicionar(GLOBAL_TABELA,array_titulos);
+    }
+
+        function carregar(){
+            listar(GLOBAL_TABELA,array_titulos);
+        }
+        carregar();
+
+    
+</script>
+{% endblock %}

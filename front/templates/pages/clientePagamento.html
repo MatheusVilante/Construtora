@@ -1,0 +1,192 @@
+{% extends '../layout/auth.html' %}
+{% load static %}
+{% block conteudo  %}
+<!DOCTYPE html>
+<html lang="pt">
+    <div id="loadingSpinner" class="spinner-border text-primary" role="status" style="display: none; height: 100vh; width: 5rem; height: 5rem;">
+            <span class="sr-only">Loading...</span>
+    </div>
+    <!-- Modal -->
+    <div class="modal fade" id="modalAtualizarParcelas" tabindex="-1" role="dialog" aria-labelledby="modalAtualizarParcelasLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalAtualizarParcelasLabel">Atualizar Parcelas</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- Formulário para atualizar as parcelas -->
+                    <form id="formAtualizarParcelas">
+                        <input type="hidden" id="loteId" value="">
+                        <div class="form-group">
+                            <label for="numeroParcela">Número da Parcela</label>
+                            <input type="number" class="form-control" id="numeroParcela" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="novoValor">Novo Valor</label>
+                            <input type="number" step="0.01" class="form-control" id="novoValor" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                    <button type="button" class="btn btn-primary" onclick="enviarAtualizacaoParcelas()">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid px-4">
+        <h1 class="mt-4" style="color: #fff">Situação de Pagamento</h1>
+        <div class="card mb-4">
+            <div class="card-body">
+                <a class="btn btn-primary btn-default" onclick="rediciona_parametro()" style="background-color: #074948;border-color #074948 !important; color: #fff;">Situação de Pagamento</a>
+                <a class="btn btn-primary btn-default" onclick="gerarparcelas()" style="background-color: #074948;border-color #074948 !important; color: #fff;">Gerar parcelas</a>
+                <a class="btn btn-primary btn-default" onclick="abrirModalAtualizarParcelas()" data-toggle="modal" data-target="#modalAtualizarParcelas" style="background-color: #074948;border-color #074948 !important; color: #fff;">Preencher Valores</a>
+            </div>
+        </div>
+        <div class="card mb-4">
+            <div class="card-body" style="overflow-x:scroll, max-width: 80%">
+                <table id="datatablesSimple"> 
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->  
+</main>
+<script>
+    var array_titulos = ['quadra', 'lote', 'cliente']
+    var GLOBAL_TABELA = 'lote';
+    function carregar(){
+        listar(GLOBAL_TABELA,array_titulos);
+    }
+    carregar();
+    
+    function rediciona_parametro(){
+      redirecionar_botao('situacaodePagamento')
+    }
+
+    function redirecionar_botao(redireciona = null){
+      var selecionados = []
+      $('.ckbsel:checked').each(function () {
+          selecionados.push(this.value)
+      });
+      if (selecionados.length > 1){
+          alert('Favor selecionar apenas uma linha')
+      }else if (selecionados.length == 0){
+          alert('Favor selecionar uma linha')
+      }else{
+          var id_selecionado = selecionados[0];
+          console.log(global_dados_api_get)
+          $.each(global_dados_api_get, function(index,value){
+            if (value.id == id_selecionado){
+                  console.log(redireciona)
+                  console.log(value.id)
+                  if(redireciona != null)
+                      window.location.href = "/"+redireciona+"?id="+value.id
+              }
+          });
+
+      }
+    }
+    function gerarparcelas() {
+        var selecionados = [];
+        $('.ckbsel:checked').each(function () {
+            selecionados.push(this.value);
+        });
+
+        if (selecionados.length > 1) {
+            alert('Favor selecionar apenas uma linha');
+            return;
+        } else if (selecionados.length === 0) {
+            alert('Favor selecionar uma linha');
+            return;
+        }
+
+        var loteId = selecionados[0];
+        var url = '/projetarParcelas/'; // Substitua pela URL correta da sua API
+
+        $.ajax({
+            url: url,
+            method: 'POST',
+            data: { lote_id: loteId },
+            success: function(response) {
+                 // Verificar se a resposta contém a mensagem informando que as parcelas já foram geradas
+                if (response.message) {
+                    alert(response.message);
+                } else {
+                    // Manipular a resposta da API quando as parcelas forem geradas com sucesso
+                    console.log(response.parcelas);
+                    alert('Parcelas geradas com sucesso!');
+                }
+            },
+            error: function(xhr, textStatus, errorThrown) {
+                // Trate erros da solicitação AJAX
+                console.log(xhr.responseText);
+                alert('Erro ao gerar parcelas. Verifique o console para mais detalhes.');
+            }
+        });
+    }
+    function abrirModalAtualizarParcelas() {
+        var selecionados = [];
+        $('.ckbsel:checked').each(function () {
+            selecionados.push(this.value);
+        });
+    
+        if (selecionados.length > 1) {
+            alert('Favor selecionar apenas uma linha');
+        } else if (selecionados.length === 0) {
+            alert('Favor selecionar uma linha');
+        } else {
+            var loteId = selecionados[0];
+            console.log(loteId)
+            console.log('loteId2')
+            console.log(loteId)
+            document.getElementById('loteId').value = loteId;
+            $('#modalAtualizarParcelas').modal('show');
+        }
+    }
+
+    function enviarAtualizacaoParcelas() {
+        $('#loadingSpinner').show();
+        // Obtenha os valores preenchidos no formulário
+        var loteId = document.getElementById('loteId').value;
+        var numeroParcela = document.getElementById('numeroParcela').value;
+        var novoValor = document.getElementById('novoValor').value;
+        console.log('loteId')
+        console.log(loteId)
+        console.log(numeroParcela)
+        console.log(novoValor)
+
+        // Faça a requisição AJAX para enviar os valores para o back-end
+        $.ajax({
+            type: 'POST',
+            url: '/atualizarParcelas/',  // Atualize com a URL correta da sua APIView
+            data: {
+                lote_id: loteId,
+                numero_parcela: numeroParcela,
+                novo_valor: novoValor
+            },
+            success: function(response) {
+                $('#loadingSpinner').hide();
+                alert('Parcelas Atualizadas com Sucesso!');
+                // Lógica de tratamento do sucesso da requisição
+                console.log(response);
+            },
+            error: function(xhr, status, error) {
+                $('#loadingSpinner').hide();
+                // Lógica de tratamento do erro da requisição
+                console.error(error);
+            }
+        });
+
+        // Feche o modal após enviar os valores
+        $('#modalAtualizarParcelas').modal('hide');
+    }
+
+
+</script>
+{% endblock %}
+

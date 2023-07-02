@@ -1,0 +1,58 @@
+{% extends '../layout/auth.html' %}
+{% load static %}
+{% block conteudo  %}
+<div class="container-fluid">
+  <h1>Gráfico de Disponibilidade de Estoque</h1>
+  <div id="tabelaEstoque"></div>
+</div>
+<style>
+  .tabela-estoque td {
+      font-size: 20px;
+      padding: 0px 10px;
+  }
+</style>
+<script>
+function criarGraficoEstoque() {
+    $.ajax({
+        url: '/disponibilidade/',
+        method: 'GET',
+        success: function(response) {
+            var estoque = response;
+
+            // Ordenar os lotes por numeração crescente
+            estoque.forEach(function(item) {
+                item.lotes.sort(function(a, b) {
+                    return a.lote - b.lote;
+                });
+            });
+
+            // Crie a estrutura de tabela para exibir as quadras e os lotes
+            var table = '<table class="tabela-estoque">';
+            estoque.forEach(function(item) {
+                table += '<tr>';
+                table += '<td>' + item.fileira + '</td>';
+                item.lotes.forEach(function(lote) {
+                    if (lote.disponibilidade) {
+                        table += '<td style="color: green;">' + lote.lote + '</td>';
+                    } else {
+                        table += '<td style="color: red;">' + lote.lote + '</td>';
+                    }
+                });
+                table += '</tr>';
+            });
+            table += '</table>';
+
+            // Insira a tabela no elemento com o ID "tabelaEstoque"
+            var tabelaEstoqueDiv = document.getElementById('tabelaEstoque');
+            tabelaEstoqueDiv.innerHTML = table;
+        },
+        error: function(xhr, status, error) {
+            console.log(error);
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', criarGraficoEstoque);
+
+</script>
+{% endblock %}

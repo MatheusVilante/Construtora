@@ -1,0 +1,30 @@
+{% extends '../layout/auth.html' %}
+{% load static %}
+{% block conteudo  %}
+<!DOCTYPE html>
+<html lang="pt">
+
+    <div class="container-fluid px-4">
+        <h1 class="mt-4" style="color: #fff">Devolucao</h1>
+        <div class="card mb-4">
+            <div class="card-body" style="overflow-x:scroll, max-width: 80%">
+                <table id="datatablesSimple"> 
+                </table>
+            </div>
+        </div>
+    </div>
+
+</main>
+<script>
+
+    var array_titulos = ['codigo_de_contrato', 'residencial', 'lote', 'quadra', 'data_de_habita', 'cliente', 'cpf', 'data_de_venda', 'valor_de_venda', 'taxa_de_juros', 'indexador_ate_habitase']
+    var GLOBAL_TABELA = 'fluxo';
+
+
+    function carregar(){
+        listar(GLOBAL_TABELA,array_titulos);
+    }
+    carregar();
+
+</script>
+{% endblock %}

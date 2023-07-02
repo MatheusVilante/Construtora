@@ -1,0 +1,159 @@
+{% extends '../layout/auth.html' %}
+{% load static %}
+{% block conteudo  %}
+<!DOCTYPE html>
+<html lang="pt">
+  <!-- The Modal -->
+  <div  class="modal" id="exampleModal"   role="dialog"  >
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+
+        <!-- Modal Header -->
+        <div class="modal-header">
+            <h2 class="modal-title" id="exampleModalLabel">Devolucao</h2>
+            <button type="button" class="close" data-dismiss="modal" >&times;</button>
+        </div>
+
+            <!-- Modal body -->
+          <div class="modal-body">
+             <form id="cadastro">
+              <input type="hidden" id="id" name="id" value=""/>
+              <div class="form-group">
+                <label for="quadra">quadra</label>
+                <select type="text" class="form-control" class="form-control" onchange="criar_select('lote', './api/v1/select/lote?id='
+                +this.value, 'lote',{})" id="quadra" name="quadra"  placeholder="quadra">
+                    </select>
+              </div>              
+              <div class="form-group">
+                <label for="lote">lote</label>
+                <select type="text" class="form-control" id="lote" name="lote"  placeholder="lote">
+                    </select>
+              </div>
+              <div class="form-group">
+                <label for="dataRecisao">DataRecisao</label>
+                <input type="date" class="form-control" id="dataRecisao" name="dataRecisao"  placeholder="DataRecisao">
+              </div>
+              <div class="form-group">
+                <label for="valorDevolver">ValorDevolver</label>
+                <input type="float" class="form-control" id="valorDevolver" name="valorDevolver"  placeholder="ValorDevolver">
+              </div>
+              <div class="form-group">
+                <label for="numParcelas">NumParcelas</label>
+                <input type="number" class="form-control" id="numParcelas" name="numParcelas"  placeholder="NumParcelas">
+              </div>
+            </form>
+          </div>
+
+        <!-- Modal footer -->
+        <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-dismiss="modal" onclick="zerar_form()">Cancelar</button>
+            <button type="button" class="btn btn-success" data-dismiss="modal" onclick="enviarDadosModal();">Salvar</button>
+        </div>
+
+      </div>
+    </div>
+</div>
+
+    <div class="container-fluid px-4">
+        <h1 class="mt-4" style="color: #fff">Devolucao</h1>
+        <div class="card mb-4">
+            <div class="card-body">
+                <a class="btn btn-primary btn-success" href="javascript:novo()" data-toggle="modal" data-target="#exampleModal">Novo</a>
+                <button class="btn btn-primary btn-warning" id="alterar-situacao-btn">Alterar Situação</button>
+                <a id="openModal" data-toggle="modal" data-target="#exampleModal" style="display:none"></a>
+                <a class="btn btn-primary btn-danger" href="javascript:excluir(GLOBAL_TABELA)">Excluir</a>
+            </div>
+        </div>
+        <div class="card mb-4">
+            <div class="card-body" style="overflow-x:scroll, max-width: 80%">
+                <table id="datatablesSimple"> 
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->  
+</main>
+<script>
+  $(document).ready(function() {
+    var table = $('#datatable').DataTable();
+  
+    // Função chamada quan  do o botão for clicado
+    $('#alterar-situacao-btn').on('click', function() {
+      // Verifica a(s) linha(s) selecionada(s)
+      var selecionados = []
+      $('.ckbsel:checked').each(function () {
+          selecionados.push(this.value)
+      });
+      if (selecionados.length > 1){
+          alert('Favor selecionar apenas uma linha')
+      }else if (selecionados.length == 0){
+          alert('Favor selecionar uma linha')
+      }else{
+        // Faz uma requisição AJAX para alterar o campo "situação" da linha selecionada
+        $.ajax({
+          url: 'api/v1/despesa/' + selecionados + '/',
+          method: 'PUT',
+          data: {
+            situacao: "pago",
+            devolucao: true
+          },
+          success: function(response) {
+            carregar();
+          },
+          error: function(error) {
+            alert("deu ruim")
+          }
+        });
+      };
+    });
+  });
+
+    setTimeout(function(){
+        criar_select('quadra', './api/v1/select/quadra', 'quadra',{})
+    },1000);
+
+    var array_titulos = ['valor','data', 'lote', 'quadra','situacao']
+    var GLOBAL_TABELA = 'despesa';
+    var GLOBAL_TABELA_READ = 'leituraDespesa';
+    function salvar(){
+        var id = adicionar(GLOBAL_TABELA,array_titulos);
+    }
+
+    function carregar(){
+        listar(GLOBAL_TABELA_READ,array_titulos,'devolucao');
+    }
+    carregar();
+
+    function enviarDadosModal() {
+
+      var dataRecisao = $('#dataRecisao').val();
+      var loteId = $('#lote').val();
+      var valor_devolver = $('#valorDevolver').val();
+      var numParcelas = $('#numParcelas').val();
+      var dados = {
+        data_recisao: dataRecisao,
+        lote: loteId,
+        valor_devolver: valor_devolver,
+        num_parcelas: numParcelas
+      };
+    
+      // Fazer a requisição AJAX
+      $.ajax({
+        url: '/parcelas/',
+        type: 'POST',
+        data:dados,
+        success: function(parcelas) {
+          console.log(dados);
+          console.log(parcelas);
+        },
+        error: function(xhr, status, error) {
+          // Tratar erro de requisição
+          console.error('Erro na requisição:', error);
+          console.log(dados)
+        }
+      });
+    }
+      
+</script>
+{% endblock %}

@@ -4,5 +4,16 @@ from .models import Entrada
 class EntradaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Entrada
-        fields = '_all_'
-        read_only_fields = ('id', 'excluido', 'data_exclusao')
+        fields = (
+            'id',
+            'observacoes',
+            'lote',
+            'cliente',
+            'situacao',
+            'vencimento',
+            'valor_pago',
+            'valor_a_receber',
+            'numero_boleto_empresa',
+            'numero_boleto_cliente',
+            'parcela',
+        )

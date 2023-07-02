@@ -2,11 +2,14 @@ from rest_framework import serializers
 from .models import Cliente
 
 class ClienteSerializer(serializers.ModelSerializer):
+    unique_together = ('nome', 'cpf')	
     class Meta:
         model = Cliente
         fields = (
+            'id',
             'nome', 
-            'email', 
+            'email',
+            'cpf',
             'telefone',
             'endereco',
             'cidade',
@@ -17,5 +20,7 @@ class ClienteSerializer(serializers.ModelSerializer):
             'vencimento',
             'datadeAssinatura',
             'data',
-            'intercalada'
+            'intercalada',
+            'profissao',
+            'rg',
             )

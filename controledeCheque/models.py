@@ -1,15 +1,29 @@
 from django.db import models
 
 class ControleCheque(models.Model):
-    lote_id = models.IntegerField()
-    nome = models.CharField(max_length=100)
-    banco = models.CharField(max_length=100)
-    agencia = models.CharField(max_length=100)
-    conta_corrente = models.CharField(max_length=100)
-    numero = models.CharField(max_length=100)
-    vencimento = models.DateField()
-    valor = models.DecimalField(max_digits=10, decimal_places=2)
-    status = models.CharField(max_length=100)
+    lote = models.ForeignKey(
+        'quadraLote.Lote',
+        verbose_name='lote',
+        related_name='LoteControleCheque',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
+    cliente = models.ForeignKey(
+        'cliente.Cliente',
+        verbose_name='cliente',
+        related_name='ClienteControleCheque',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
+    banco = models.CharField(max_length=100, null=True, blank=True)
+    agencia = models.CharField(max_length=100, null=True, blank=True)
+    conta_corrente = models.CharField(max_length=100, null=True, blank=True)
+    numero = models.CharField(max_length=100, null=True, blank=True)
+    vencimento = models.DateField(null=True, blank=True)
+    valor = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    status = models.CharField(max_length=100, null=True, blank=True)
     observacoes = models.CharField(max_length=100, null=True, blank=True) 
     
     def __str__(self):
