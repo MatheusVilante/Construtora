@@ -83,13 +83,13 @@
     var array_titulos = ['lote', 'data', 'tipo_documento']
     var GLOBAL_TABELA = 'documento';
     function salvar(){
-        var id = adicionar(GLOBAL_TABELA,array_titulos);
+        adicionar(GLOBAL_TABELA,array_titulos);
     }
 
-        function carregar(){
-            listar(GLOBAL_TABELA,array_titulos);
-        }
-        carregar();
+    function carregar(){
+        listar(GLOBAL_TABELA,array_titulos);
+    }
+    carregar();
 
     
 </script>

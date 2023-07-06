@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.urls import path,include
+from documento.serializers import DocumentoReadSerializer
 import dropbox
 from dropbox.urls import *
 import front.urls
@@ -25,11 +26,13 @@ router.register(r'quadra', QuadraViewSet)
 router.register(r'lote', LoteViewSet)
 router.register(r'controlefuncionario', ControleFuncionarioViewSet)
 router.register(r'documento', DocumentoViewSet)
+# router.register(r'documentoread', DocumentoReadSerializer, basename='documentoread')
 router.register(r'parcelamento', ParcelamentoViewSet)
 router.register(r'devolucao', DevolucaoViewSet)
 router.register(r'devolucaoparcela', DevolucaoParcelaViewSet)
 router.register(r'historico', HistoricoViewSet)
 router.register(r'leituraDespesa', LeituraDespesaViewSet)
+# router.register(r'leituraDespesa', DocumentoReadViewSet)
 
 urlpatterns = [
     path('vincularLote/', ClienteLoteView.as_view()),
