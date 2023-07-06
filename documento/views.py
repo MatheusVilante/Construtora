@@ -5,7 +5,11 @@ from .serializers import DocumentoSerializer, HistoricoSerializer
 
 class DocumentoViewSet(viewsets.ModelViewSet):
     queryset = Documento.objects.all()
-    serializer_class = DocumentoSerializer
+    
+    def get_serializer_class(self):
+        if self.action in ['list', 'retrieve']:
+            return DocumentoReadSerializer
+        return DocumentoSerializer
 
 class HistoricoViewSet(viewsets.ModelViewSet):
     queryset = Historico.objects.all()

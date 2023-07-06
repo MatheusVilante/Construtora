@@ -13,6 +13,15 @@ class LoteSerializer(serializers.ModelSerializer):
         model = Lote
         fields = '__all__'
 
+class LoteReadSerializer(serializers.ModelSerializer):
+    quadra = serializers.ReadOnlyField(source='quadra.quadra')
+    residencial = serializers.ReadOnlyField(source='quadra.residencial')
+    cliente = serializers.ReadOnlyField(source='cliente.nome')
+    
+    class Meta:
+        model = Lote
+        fields = '__all__'
+
 
 class FluxoSerializer(serializers.ModelSerializer):
     quadra = serializers.ReadOnlyField(source='quadra.quadra')

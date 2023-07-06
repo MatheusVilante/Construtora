@@ -30,11 +30,6 @@
                     </select>
               </div>
               <div class="form-group">
-                <label for="cliente">cliente</label>
-                <select type="text" class="form-control" id="cliente" name="cliente"  placeholder="cliente">
-                    </select>
-              </div>
-              <div class="form-group">
                 <label for="data">Data</label>
                 <input type="date" class="form-control" id="data" name="data"  placeholder="Data">
               </div>
@@ -82,11 +77,10 @@
 <script>
     setTimeout(function(){
         criar_select('quadra', './api/v1/select/quadra', 'quadra',{})
-        criar_select('cliente', './api/v1/select/cliente', 'cliente',{})
     },1000);
 
         
-    var array_titulos = ['lote', 'cliente',]
+    var array_titulos = ['lote', 'data', 'tipo_documento']
     var GLOBAL_TABELA = 'documento';
     function salvar(){
         var id = adicionar(GLOBAL_TABELA,array_titulos);

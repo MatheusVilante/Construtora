@@ -2,7 +2,7 @@ from rest_framework import viewsets
 from decimal import Decimal
 from entrada.models import Entrada
 from .models import Quadra, Lote
-from .serializers import FluxoSerializer, QuadraSerializer, LoteSerializer
+from .serializers import FluxoSerializer, LoteReadSerializer, QuadraSerializer, LoteSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.http import JsonResponse
@@ -14,10 +14,13 @@ class QuadraViewSet(viewsets.ModelViewSet):
     queryset = Quadra.objects.all()
     serializer_class = QuadraSerializer
 
-
 class LoteViewSet(viewsets.ModelViewSet):
     queryset = Lote.objects.all()
-    serializer_class = LoteSerializer
+
+    def get_serializer_class(self):
+        if self.action in ['list', 'retrieve']:
+            return LoteReadSerializer
+        return LoteSerializer
 
 class FluxoViewSet(viewsets.ModelViewSet):
     queryset = Lote.objects.all()
@@ -28,7 +31,7 @@ class ClienteLoteView(APIView):
     def get(self, request):
         id = request.GET.get("id")
         parametro = Lote.objects.filter(cliente_id=id)
-        serializer_class = LoteSerializer(parametro, many=True)
+        serializer_class = LoteReadSerializer(parametro, many=True)
         return Response(serializer_class.data)
     
     

@@ -66,12 +66,13 @@
       criar_select('quadra', './api/v1/select/quadra', 'quadra',{})
     },1000);
     var array_titulos = ['quadra', 'lote']
+    var array_titulosread = ['residencial','quadra', 'lote']
     var GLOBAL_TABELA = 'lote';
     function salvar(){
         var id = adicionar(GLOBAL_TABELA,array_titulos);
     }
     function carregar(){
-       listar(GLOBAL_TABELA,array_titulos);
+       listar(GLOBAL_TABELA,array_titulosread);
     }
 
     carregar();
