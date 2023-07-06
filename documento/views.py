@@ -1,6 +1,6 @@
 from rest_framework import viewsets
 from .models import Documento, Historico
-from .serializers import DocumentoSerializer, HistoricoSerializer
+from .serializers import DocumentoSerializer, HistoricoSerializer, DocumentoReadSerializer
 
 
 class DocumentoViewSet(viewsets.ModelViewSet):
