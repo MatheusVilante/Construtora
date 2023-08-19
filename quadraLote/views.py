@@ -9,6 +9,9 @@ from django.http import JsonResponse
 from django.db.models import Prefetch
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
+from django.utils import timezone
+from rest_framework.views import APIView
+from rest_framework.response import Response
 
 class QuadraViewSet(viewsets.ModelViewSet):
     queryset = Quadra.objects.all()
@@ -55,45 +58,97 @@ class Disponibilidade(APIView):
 
         return JsonResponse(estoque, safe=False)
     
+
+
 class ProjecaoParcelasView(APIView):
     def post(self, request):
-        lote_id = request.data.get('lote_id')
+        numero_primeira_parcela = int(request.POST.get("numero_primeira_parcela"))
+        numero_ultima_parcela = int(request.POST.get("numero_ultima_parcela"))
+        data_de_vencimento = datetime.strptime(request.POST.get("data_de_vencimento"), "%Y-%m-%d").date()
+        valor = float(request.POST.get("valor").replace(",", "."))
+        numero_you = int(request.POST.get("numero_you"))
+        numero_i = int(request.POST.get("numero_i"))
+        numero_do_carne = request.POST.get("numero_do_carne")
+        lote_id = request.POST.get("lote_id")
 
-        try:
-            lote = Lote.objects.get(id=lote_id)
-        except Lote.DoesNotExist:
-            return Response({'error': 'Lote não encontrado'}, status=404)
+        parcelas_existentes = Entrada.objects.filter(lote_id=lote_id, parcela__lte=numero_ultima_parcela)
+        print(parcelas_existentes)
+        if parcelas_existentes.exists():
+            ultimo_numero_parcela_existente = parcelas_existentes.last().parcela
+            # print(ultimo_numero_parcela_existente)
+            proximo_numero_esperado = int(ultimo_numero_parcela_existente) + 1
+            # print(proximo_numero_esperado)
 
-        if Entrada.objects.filter(lote=lote).exists():
-            return Response({'message': 'Parcelas já geradas para este lote'})
+            if numero_primeira_parcela != proximo_numero_esperado:
+                # print("numero errado")
+                return Response({
+                    "error": f"O primeiro número da parcela deve ser {proximo_numero_esperado}"
+                })
 
-        data_parcelas = lote.data_parcelas
-        numero_parcelas = lote.numero_parcelas
-        valor_inicial = lote.valor_inicial
-        
+        # Gerar as parcelas
         parcelas = []
-        valor_parcela = valor_inicial / numero_parcelas
-        data_projecao = data_parcelas
-
-        for i in range(numero_parcelas):
+        for numero_parcela in range(numero_primeira_parcela, numero_ultima_parcela + 1):
+            vencimento = data_de_vencimento + relativedelta(months=numero_parcela - numero_primeira_parcela)  # Incrementa 1 mês para cada parcela
             parcela = {
-                'vencimento': data_projecao,
-                'parcela': i + 1,
-                'valor_a_receber': valor_parcela
+                "numero": numero_parcela,
+                "vencimento": vencimento,
+                "valor": valor,
+                "nosso_numero": f"{numero_do_carne}/{numero_parcela + numero_i - numero_primeira_parcela}",
+                "seu_numero": numero_you + numero_parcela - numero_primeira_parcela
             }
             parcelas.append(parcela)
-            data_projecao += relativedelta(months=1)
-
-        for parcela in parcelas:
-            entrada = Entrada(
-                lote=lote,
-                vencimento=parcela['vencimento'],
-                parcela=parcela['parcela'],
-                valor_a_receber=parcela['valor_a_receber']
+            entrada = Entrada.objects.create(
+                lote_id=lote_id,
+                vencimento=vencimento,
+                valor_a_receber=valor,
+                numero_boleto_cliente=parcela["seu_numero"],
+                numero_boleto_empresa=parcela["nosso_numero"],
+                parcela=numero_parcela
             )
+            # print(entrada)
             entrada.save()
 
-        return Response({'parcelas': parcelas})    
+        # Retornar as parcelas
+        return Response(parcelas)
+
+
+    #     lote_id = request.data.get('lote_id')
+
+    #     try:
+    #         lote = Lote.objects.get(id=lote_id)
+    #     except Lote.DoesNotExist:
+    #         return Response({'error': 'Lote não encontrado'}, status=404)
+
+    #     if Entrada.objects.filter(lote=lote).exists():
+    #         return Response({'message': 'Parcelas já geradas para este lote'})
+
+    #     data_parcelas = lote.data_parcelas
+    #     numero_parcelas = lote.numero_parcelas
+    #     valor_inicial = lote.valor_inicial
+        
+    #     parcelas = []
+    #     valor_parcela = valor_inicial / numero_parcelas
+    #     data_projecao = data_parcelas
+
+    #     for i in range(numero_parcelas):
+    #         parcela = {
+    #             'vencimento': data_projecao,
+    #             'parcela': i + 1,
+    #             'valor_a_receber': valor_parcela
+    #         }
+    #         parcelas.append(parcela)
+    #         data_projecao += relativedelta(months=1)
+
+    #     for parcela in parcelas:
+    #         entrada = Entrada(
+    #             lote=lote,
+    #             vencimento=parcela['vencimento'],
+    #             parcela=parcela['parcela'],
+    #             valor_a_receber=parcela['valor_a_receber']
+    #         )
+    #         entrada.save()
+
+    #     return Response({'parcelas': parcelas})    
 
 class AtualizarValorParcelasAPIView(APIView):
     def post(self, request):
