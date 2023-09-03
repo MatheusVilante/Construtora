@@ -1,11 +1,12 @@
 from django.conf.urls import url
 from django.urls import path
 
-from .views import clienteLote, controleFuncionario, dadosIniciais, depositoCliente, despesa, devolucao, documentoEnviado, fluxo, historico, imposto, index, cliente, inicio, lote, quadra, situacaodePagamento, clientePagamento, controledeCheque, disponibilidade
+from .views import clienteLote, controleFuncionario, dadosIniciais, depositoCliente, despesa, devolucao, documentoEnviado, fluxo, historico, imposto, index, cliente, inicio, login, lote, quadra, situacaodePagamento, clientePagamento, controledeCheque, disponibilidade
 
 
 urlpatterns = [
     path('index', index, name='index'),
+    path('login', login, name='login'),
     path('cliente', cliente, name='cliente'),
     path('quadra', quadra, name='quadra'),
     path('lote', lote, name='lote'),

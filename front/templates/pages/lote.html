@@ -3,6 +3,62 @@
 {% block conteudo  %}
 <!DOCTYPE html>
 <html lang="pt">
+    <!-- Modal Parcelas-->
+    <div class="modal fade" id="modalAtualizarParcelas" tabindex="-1" role="dialog" aria-labelledby="modalAtualizarParcelasLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+          <div class="modal-content">
+              <div class="modal-header">
+                  <h5 class="modal-title" id="modalAtualizarParcelasLabel">Atualizar Parcelas</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                  </button>
+              </div>
+              <div class="modal-body">
+                  <!-- Formulário para atualizar as parcelas -->
+                  <form id="formAtualizarParcelas">
+                      <input type="hidden" id="loteId" value="">
+                      <div class="form-group">
+                        <label for="tipo_parcela">Tipo de Parcela</label>
+                        <select class="form-control" id="tipo_parcela" required>
+                            <option value="int">Intercalada</option>
+                            <option value="ent">Entrada</option>
+                            <option value="com">Parcela Comum</option>
+                        </select>
+                      </div>
+                      <div class="form-group">
+                          <label for="numero_parcelas">Número de Parcelas</label>
+                          <input type="number" class="form-control" id="numero_parcelas" required>
+                      </div>
+                      <div class="form-group">
+                          <label for="valor">Valor</label>
+                          <input type="number" step="0.01" class="form-control" id="valor" required>
+                      </div>
+                      <div class="form-group">
+                          <label for="data_de_vencimento">Data de Vencimento</label>
+                          <input type="date" class="form-control" id="data_de_vencimento" required>
+                      </div>
+                      <div class="form-group">
+                          <label for="numero_you">Número do Boleto do Cliente</label>
+                          <input type="number" class="form-control" id="numero_you" required>
+                      </div>
+                      <div class="form-group">
+                          <label for="numero_i">Número do Boleto da Empresa</label>
+                          <input type="number" class="form-control" id="numero_i" required>
+                      </div>
+                      <div class="form-group">
+                          <label for="numero_do_carne">Número do Carne</label>
+                          <input type="number" class="form-control" id="numero_do_carne" required>
+                      </div>
+                  </form>
+              </div>
+              <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                  <button type="button" class="btn btn-primary" onclick="enviarAtualizacaoParcelas()">Salvar</button>
+              </div>
+          </div>
+      </div>
+  </div>
+
 
   <!-- The Modal -->
   <div  class="modal" id="exampleModal"   role="dialog"  >
@@ -49,7 +105,12 @@
                 <a class="btn btn-secondary btn-info" href="javascript:editar()">Editar</a>
                 <a id="openModal" data-toggle="modal" data-target="#exampleModal" style="display:none"></a>
                 <a class="btn btn-primary btn-danger" href="javascript:excluir(GLOBAL_TABELA)">Excluir</a>
+            </br>
+            <p></p>
+                <a class="btn btn-primary btn-default" onclick="rediciona_parametro()" style="background-color: #074948;border-color :#074948 !important; color: #fff;">Situação de Pagamento</a>
+                <a class="btn btn-primary btn-default" onclick="abrirModalAtualizarParcelas()" style="background-color: #074948;border-color : #074948 !important; color: #fff;">Preencher Valores das Parcelas</a>
             </div>
+            
         </div>
         <div class="card mb-4">
             <div class="card-body">
@@ -74,9 +135,108 @@
     function carregar(){
        listar(GLOBAL_TABELA,array_titulosread);
     }
+    function rediciona_parametro(){
+      redirecionar_botao('situacaodePagamento')
+    }
 
     carregar();
 
 
+    function abrirModalAtualizarParcelas() {
+        var selecionados = [];
+        $('.ckbsel:checked').each(function () {
+            selecionados.push(this.value);
+        });
+    
+        if (selecionados.length > 1) {
+            alert('Favor selecionar apenas uma linha');
+        } else if (selecionados.length === 0) {
+            alert('Favor selecionar uma linha');
+        } else {
+            var loteId = selecionados[0];
+            document.getElementById('loteId').value = loteId;
+            $('#modalAtualizarParcelas').modal('show');
+        }
+    }
+
+    function enviarAtualizacaoParcelas() {
+        $('#loadingSpinner').show();
+
+        // Obtenha os valores preenchidos no formulário
+        var tipoParcela = $("#tipo_parcela").val();
+        var numeroParcelas = $("#numero_parcelas").val();
+        var dataDeVencimento = $("#data_de_vencimento").val();
+        var valor = $("#valor").val();
+        var numeroYou = $("#numero_you").val();
+        var numeroI = $("#numero_i").val();
+        var numeroDoCarne = $("#numero_do_carne").val();
+        var loteId = $("#loteId").val();
+
+        // Se o tipo de parcela for "Parcela Comum", defina o valor correspondente como null
+        if (tipoParcela === "com") {
+          tipoParcela = null;
+        }
+
+        var data = {
+            numero_parcelas: numeroParcelas,
+            tipo_parcela: tipoParcela,
+            data_de_vencimento: dataDeVencimento,
+            valor: valor,
+            numero_you: numeroYou,
+            numero_i: numeroI,
+            numero_do_carne: numeroDoCarne,
+            lote_id: loteId
+        };
+
+        // Faça a requisição AJAX para enviar os valores para o back-end
+        $.ajax({
+            type: 'POST',
+            url: '/projetarParcelas/',
+            data: data,
+            success: function(response) {
+                $('#loadingSpinner').hide();
+                if (response.error) {
+                alert(response.error);
+                } else {
+                    alert('Parcelas Atualizadas com Sucesso!');
+                }
+                console.log(response);
+
+            },
+            error: function(xhr, status, error) {
+                $('#loadingSpinner').hide();
+                console.error(error);
+                alert(error)
+            }
+        });
+
+        // Feche o modal após enviar os valores
+        $('#modalAtualizarParcelas').modal('hide');
+    }
+
+    
+function redirecionar_botao(redireciona = null){
+    var selecionados = []
+    $('.ckbsel:checked').each(function () {
+        selecionados.push(this.value)
+    });
+    if (selecionados.length > 1){
+        alert('Favor selecionar apenas uma linha')
+    }else if (selecionados.length == 0){
+        alert('Favor selecionar uma linha')
+    }else{
+        var id_selecionado = selecionados[0];
+        console.log(global_dados_api_get)
+        $.each(global_dados_api_get, function(index,value){
+          if (value.id == id_selecionado){
+                console.log(redireciona)
+                console.log(value.id)
+                if(redireciona != null)
+                    window.location.href = "/"+redireciona+"?id="+value.id
+            }
+        });
+
+    }
+  }
 </script>
 {% endblock %}   

@@ -58,39 +58,54 @@ class Disponibilidade(APIView):
 
         return JsonResponse(estoque, safe=False)
     
-
-
 class ProjecaoParcelasView(APIView):
     def post(self, request):
-        numero_primeira_parcela = int(request.POST.get("numero_primeira_parcela"))
-        numero_ultima_parcela = int(request.POST.get("numero_ultima_parcela"))
+        numero_parcelas = int(request.POST.get("numero_parcelas"))
         data_de_vencimento = datetime.strptime(request.POST.get("data_de_vencimento"), "%Y-%m-%d").date()
         valor = float(request.POST.get("valor").replace(",", "."))
         numero_you = int(request.POST.get("numero_you"))
         numero_i = int(request.POST.get("numero_i"))
         numero_do_carne = request.POST.get("numero_do_carne")
         lote_id = request.POST.get("lote_id")
+        tipo_parcela = request.POST.get("tipo_parcela")  # Adicione este campo
 
-        parcelas_existentes = Entrada.objects.filter(lote_id=lote_id, parcela__lte=numero_ultima_parcela)
-        print(parcelas_existentes)
-        if parcelas_existentes.exists():
-            ultimo_numero_parcela_existente = parcelas_existentes.last().parcela
-            # print(ultimo_numero_parcela_existente)
-            proximo_numero_esperado = int(ultimo_numero_parcela_existente) + 1
-            # print(proximo_numero_esperado)
-
-            if numero_primeira_parcela != proximo_numero_esperado:
-                # print("numero errado")
-                return Response({
-                    "error": f"O primeiro número da parcela deve ser {proximo_numero_esperado}"
-                })
+        # Verifique se o tipo de parcela não é "int" ou "ent" para determinar a sequência
+        if tipo_parcela != "int" and tipo_parcela != "ent":
+            parcelas_existentes = Entrada.objects.filter(lote_id=lote_id).exclude(parcela__contains="INT.").exclude(parcela__contains="ENT.")
+            if parcelas_existentes.exists():
+                ultimo_numero_parcela_existente = max([int(p.parcela) for p in parcelas_existentes])
+                numero_primeira_parcela = ultimo_numero_parcela_existente + 1
+            else:
+                numero_primeira_parcela = 1
+        else:
+            numero_primeira_parcela = 1
 
         # Gerar as parcelas
         parcelas = []
-        for numero_parcela in range(numero_primeira_parcela, numero_ultima_parcela + 1):
-            vencimento = data_de_vencimento + relativedelta(months=numero_parcela - numero_primeira_parcela)  # Incrementa 1 mês para cada parcela
+        for numero_parcela in range(numero_primeira_parcela, numero_primeira_parcela + numero_parcelas):
+            if tipo_parcela == "int":
+                parcelas_existentes_int = Entrada.objects.filter(lote_id=lote_id, parcela__contains="INT.").exclude(parcela__contains="ENT.")
+                if parcelas_existentes_int.exists():
+                    # Encontre a parcela "int" com o maior número
+                    ultima_parcela_int = max([int(p.parcela.split('.')[1].split('-')[0]) for p in parcelas_existentes_int])
+                    numero_int = ultima_parcela_int + 1
+                else:
+                    numero_int = 1
+
+                # Construa a parcela no formato correto
+                ano_intercalada = data_de_vencimento.year
+                numero_parcela_formatado = f"INT.{numero_int}-{ano_intercalada}"
+
+            elif tipo_parcela == "ent":
+                numero_entrada = numero_parcela - numero_primeira_parcela + 1
+                numero_parcela_formatado = f"ENT.{numero_entrada}"  
+
+            else:  # Parcela comum
+                numero_parcela_formatado = numero_parcela
+
+            vencimento = data_de_vencimento + relativedelta(months=numero_parcela - numero_primeira_parcela)
             parcela = {
-                "numero": numero_parcela,
+                "numero": numero_parcela_formatado,
                 "vencimento": vencimento,
                 "valor": valor,
                 "nosso_numero": f"{numero_do_carne}/{numero_parcela + numero_i - numero_primeira_parcela}",
@@ -103,52 +118,13 @@ class ProjecaoParcelasView(APIView):
                 valor_a_receber=valor,
                 numero_boleto_cliente=parcela["seu_numero"],
                 numero_boleto_empresa=parcela["nosso_numero"],
-                parcela=numero_parcela
+                parcela=numero_parcela_formatado,
+                situacao='aberta'
             )
-            # print(entrada)
             entrada.save()
-
         # Retornar as parcelas
         return Response(parcelas)
 
-
-    #     lote_id = request.data.get('lote_id')
-
-    #     try:
-    #         lote = Lote.objects.get(id=lote_id)
-    #     except Lote.DoesNotExist:
-    #         return Response({'error': 'Lote não encontrado'}, status=404)
-
-    #     if Entrada.objects.filter(lote=lote).exists():
-    #         return Response({'message': 'Parcelas já geradas para este lote'})
-
-    #     data_parcelas = lote.data_parcelas
-    #     numero_parcelas = lote.numero_parcelas
-    #     valor_inicial = lote.valor_inicial
-        
-    #     parcelas = []
-    #     valor_parcela = valor_inicial / numero_parcelas
-    #     data_projecao = data_parcelas
-
-    #     for i in range(numero_parcelas):
-    #         parcela = {
-    #             'vencimento': data_projecao,
-    #             'parcela': i + 1,
-    #             'valor_a_receber': valor_parcela
-    #         }
-    #         parcelas.append(parcela)
-    #         data_projecao += relativedelta(months=1)
-
-    #     for parcela in parcelas:
-    #         entrada = Entrada(
-    #             lote=lote,
-    #             vencimento=parcela['vencimento'],
-    #             parcela=parcela['parcela'],
-    #             valor_a_receber=parcela['valor_a_receber']
-    #         )
-    #         entrada.save()
-
-    #     return Response({'parcelas': parcelas})    
 
 class AtualizarValorParcelasAPIView(APIView):
     def post(self, request):

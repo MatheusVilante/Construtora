@@ -35,6 +35,72 @@ function zerar_form(){
     }
 
 
+function login() {
+    var username = $("#username").val();
+    var password = $("#password").val();
+    if (username == '') {
+        alert('Username is required');
+    } else {
+        data = { "username": username, "password": password, "redirecionar": true };
+        $.ajax({
+            url: '/api/v1/login/',
+            type: 'POST',
+            data: data,
+            error: function (e) {
+                alert(e);
+            },
+            success: function (data) {
+                if (data.token != null) {
+                    window.sessionStorage.setItem('global_token', data.token);
+
+                    // Verifica se existe o campo unidade_padrao na resposta
+                    if (data.unidade_padrao) {
+                        // alert('entrei')
+                        // Armazena o id do unidade_padrao no sessionStorage
+                        window.sessionStorage.setItem('ultima_opcao', data.unidade_padrao.id);
+                        // Armazena o nome da unidade no sessionStorage
+                        window.sessionStorage.setItem('unidade_selecionada', data.unidade_padrao.nome);
+                    }
+                    if (data.nome_usuario) {
+                        // Armazena o nome do usuário no sessionStorage
+                        window.sessionStorage.setItem('nome_usuario', data.nome_usuario);
+                    }
+                    // guardar_token();
+                    $("form").submit();
+                } else {
+                    // alert(data)
+                }
+            },
+            dataType: 'json'
+        });
+    }
+}
+
+function redirecionar_botao(redireciona = null){
+    var selecionados = []
+    $('.ckbsel:checked').each(function () {
+        selecionados.push(this.value)
+    });
+    if (selecionados.length > 1){
+        alert('Favor selecionar apenas uma linha')
+    }else if (selecionados.length == 0){
+        alert('Favor selecionar uma linha')
+    }else{
+        var id_selecionado = selecionados[0];
+        console.log(global_dados_api_get)
+        $.each(global_dados_api_get, function(index,value){
+          if (value.id == id_selecionado){
+                console.log(redireciona)
+                console.log(value.id)
+                if(redireciona != null)
+                    window.location.href = "/"+redireciona+"?id="+value.id
+            }
+        });
+
+    }
+  }
+    
+
 function adicionar(tabela,campos,campoMarcado = null){
     var data = objectifyForm($('#cadastro').serializeArray());
     // Obter uma lista de todas as checkboxes do formulário

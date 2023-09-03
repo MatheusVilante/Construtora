@@ -82,7 +82,7 @@
             </div>
         </div>
         <div class="card mb-4">
-            <div class="card-body" style="overflow-x:scroll, max-width: 80%">
+            <div class="card-body" style="overflow-x:scroll, max-width 80%">
                 <table id="datatablesSimple"> 
                 </table>
             </div>
@@ -97,7 +97,7 @@
         const GLOBAL_ID_EQUIPAMENTO =  urlParams.get("id");    
         $("#lote").val(GLOBAL_ID_EQUIPAMENTO);
         
-        var array_titulos = ['lote', 'situacao', 'parcela',]
+        var array_titulos = ['quadra', 'lote', 'numero_boleto_cliente', 'numero_boleto_empresa', 'parcela', 'valor_a_receber', 'vencimento', 'situacao',]
         var GLOBAL_TABELA = 'clientePagamento';
         function salvar(){
             var id = adicionar(GLOBAL_TABELA,array_titulos);
