@@ -1,13 +1,14 @@
 from django.http import JsonResponse
 from rest_framework import viewsets
 from .models import Entrada
-from .serializers import EntradaSerializer
+from .serializers import EntradaREADSerializer, EntradaSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.shortcuts import render
 from django.db.models import Sum
 from django.db.models.functions import ExtractDay
 from datetime import date, timedelta
+from django.contrib.auth.decorators import login_required
 
 
 
@@ -17,10 +18,11 @@ class EntradaViewSet(viewsets.ModelViewSet):
     
 
 class ClientePagamentoView(APIView):
+    
     def get(self, request):
         id = request.GET.get("id")
         parametro = Entrada.objects.filter(lote_id=id)
-        serializer_class = EntradaSerializer(parametro, many=True)
+        serializer_class = EntradaREADSerializer(parametro, many=True)
         return Response(serializer_class.data)
     
 class GraficoEntradaView(APIView):

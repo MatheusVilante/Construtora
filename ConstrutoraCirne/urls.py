@@ -14,6 +14,7 @@ from controleFuncionario.views import ControleFuncionarioViewSet
 from documento.views import DocumentoViewSet, HistoricoViewSet
 from parcelamento.views import ParcelamentoViewSet
 from devolucao.views import DevolucaoViewSet, DevolucaoParcelaViewSet
+from usuario.views import UsuarioAPIView
 
 
 router = SimpleRouter()
@@ -36,6 +37,7 @@ router.register(r'leituraDespesa', LeituraDespesaViewSet)
 
 urlpatterns = [
     path('vincularLote/', ClienteLoteView.as_view()),
+    path('api/v1/login/', UsuarioAPIView.as_view()),
     path('atualizarParcelas/', AtualizarValorParcelasAPIView.as_view()),
     path('projetarParcelas/', ProjecaoParcelasView.as_view()),
     path('graficoEntrada/', GraficoEntradaView.as_view()),

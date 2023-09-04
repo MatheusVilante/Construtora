@@ -34,6 +34,7 @@ ALLOWED_HOSTS = ['*']
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
+    'rest_framework.authtoken',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
@@ -49,6 +50,7 @@ INSTALLED_APPS = [
     'documento',
     'parcelamento',
     'devolucao',
+    'usuario',
     'front',
 ]
 
@@ -143,3 +145,20 @@ STATICFILES_DIRS = '/construtoracirne/front/static',
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
  
+REST_FRAMEWORK = {
+    'NON_FIELD_ERRORS_KEY': "errors",
+    'DEFAULT_AUTHENTICATION_CLASSES' : [
+        'rest_framework.authentication.BasicAuthentication',
+        #'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+
+    ],
+    # 'DEFAULT_PERMISSION_CLASSES':(
+    #     'rest_framework.permissions.IsAuthenticatedOrReadOnly'
+    # )
+}
+
+LOGIN_URL='/login'
+
+LOGIN_REDIRECT_URL = '/login'
+LOGOUT_REDIRECT_URL = '/login'
